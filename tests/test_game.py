@@ -64,7 +64,7 @@ def test_state_includes_actual_bird_y() -> None:
     assert state.bird_y == pytest.approx(initial.bird_y + game.gravity)
 
 
-def test_dx_tracks_trailing_edge_until_pipe_is_cleared() -> None:
+def test_dx_uses_bird_trailing_edge_until_pipe_is_cleared() -> None:
     game = FlappyGame(
         seed=10,
         width=320,
@@ -78,9 +78,15 @@ def test_dx_tracks_trailing_edge_until_pipe_is_cleared() -> None:
         state = game.tick(False)
 
     assert game.alive
+    assert game.score == 0
+    assert state.dx == pytest.approx(6)
+    assert state.dx > 0
+
+    state = game.tick(False)
+
+    assert game.alive
     assert game.score == 1
-    assert state.dx == pytest.approx(-8)
-    assert state.dx > -game.bird_radius
+    assert state.dx > game.pipe_width
 
 
 def test_reset_without_seed_replays_same_map() -> None:
@@ -151,10 +157,10 @@ def test_frames_and_obstacles_passed_are_readable_separately() -> None:
         pipe_spacing=120,
     )
 
-    for _ in range(3):
+    for _ in range(4):
         game.tick(False)
 
-    assert game.frames == 3
+    assert game.frames == 4
     assert game.ticks == game.frames
     assert game.obstacles_passed == 2
     assert game.score == game.obstacles_passed

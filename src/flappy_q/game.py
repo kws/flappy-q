@@ -28,8 +28,8 @@ class FlappyGame:
 
     Coordinates use a top-left origin. Positive `dy` means the bird is below the
     center of the active pipe opening; negative `dy` means it is above. `dx`
-    measures the horizontal distance from the bird to the active pipe's trailing
-    edge.
+    measures the horizontal distance from the bird's trailing edge to the active
+    pipe's trailing edge.
     """
 
     def __init__(
@@ -356,22 +356,25 @@ class FlappyGame:
 
     def _read_state(self) -> GameState:
         pipe = self._next_pipe()
+        bird_trailing_edge = self.bird_x - self.bird_radius
         return GameState(
             dy=self._bird_y - pipe.gap_y,
             vy=self._bird_vy,
-            dx=pipe.x + self.pipe_width - self.bird_x,
+            dx=pipe.x + self.pipe_width - bird_trailing_edge,
             bird_y=self._bird_y,
         )
 
     def _next_pipe(self) -> _Pipe:
+        bird_trailing_edge = self.bird_x - self.bird_radius
         for pipe in self._pipes:
-            if pipe.x + self.pipe_width >= self.bird_x - self.bird_radius:
+            if pipe.x + self.pipe_width > bird_trailing_edge:
                 return pipe
         return self._pipes[0]
 
     def _update_score(self) -> None:
+        bird_trailing_edge = self.bird_x - self.bird_radius
         for pipe in self._pipes:
-            if not pipe.scored and pipe.x + self.pipe_width < self.bird_x:
+            if not pipe.scored and pipe.x + self.pipe_width <= bird_trailing_edge:
                 pipe.scored = True
                 self._score += 1
 

@@ -7,7 +7,7 @@ The core game advances one tick at a time. Each tick accepts one action, `flap` 
 
 - `dy`: bird vertical offset from the next pipe opening center
 - `vy`: bird vertical velocity
-- `dx`: horizontal distance from the bird to the active pipe's trailing edge
+- `dx`: horizontal distance from the bird's trailing edge to the active pipe's trailing edge
 - `bird_y`: absolute bird vertical position for edge detection
 
 ## Install and run
