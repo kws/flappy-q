@@ -42,9 +42,25 @@ print(state.dy, state.vy, state.dx)
 print(game.alive, game.frames, game.obstacles_passed)
 ```
 
-Rendering targets a `tkinter.Canvas`-compatible object:
+Rendering supports either a `tkinter.Canvas`-compatible object or an
+`ipycanvas.Canvas` in notebooks:
 
 ```python
+game.render(canvas)
+```
+
+Notebook example:
+
+```python
+from IPython.display import display
+from ipycanvas import Canvas
+
+from flappy_q import FlappyGame
+
+game = FlappyGame(seed=123)
+canvas = Canvas(width=game.width, height=game.height)
+display(canvas)
+
 game.render(canvas)
 ```
 

@@ -141,8 +141,21 @@ class FlappyGame:
         return self.state
 
     def render(self, canvas: object) -> None:
-        """Render the current scene to a tkinter.Canvas-compatible object."""
+        """Render the current scene to a tkinter.Canvas or ipycanvas.Canvas."""
 
+        if self._is_tk_canvas(canvas):
+            self._render_tk(canvas)
+            return
+
+        if self._is_ipycanvas(canvas):
+            self._render_ipycanvas(canvas)
+            return
+
+        raise TypeError(
+            "canvas must be compatible with tkinter.Canvas or ipycanvas.Canvas"
+        )
+
+    def _render_tk(self, canvas: object) -> None:
         if hasattr(canvas, "configure"):
             canvas.configure(width=self.width, height=self.height)
 
@@ -203,6 +216,174 @@ class FlappyGame:
                 fill="#17324d",
                 font=("Helvetica", 24, "bold"),
             )
+
+    def _render_ipycanvas(self, canvas: object) -> None:
+        self._configure_ipycanvas(canvas)
+        save = getattr(canvas, "save", None)
+        restore = getattr(canvas, "restore", None)
+        flush = getattr(canvas, "flush", None)
+        should_restore = callable(save) and callable(restore)
+
+        if should_restore:
+            save()
+
+        try:
+            canvas.clear()
+
+            self._ipy_fill_rect(canvas, 0, 0, self.width, self.height, "#8bd3ff")
+            self._ipy_fill_rect(
+                canvas, 0, self.height - 42, self.width, 42, "#72b657"
+            )
+
+            gap_half = self.pipe_gap / 2
+            for pipe in self._pipes:
+                x = pipe.x
+                if x + self.pipe_width < 0 or x > self.width:
+                    continue
+
+                top_gap = pipe.gap_y - gap_half
+                bottom_gap = pipe.gap_y + gap_half
+                self._ipy_rect(
+                    canvas,
+                    x,
+                    0,
+                    self.pipe_width,
+                    top_gap,
+                    fill="#3a9d44",
+                    outline="#237a31",
+                )
+                self._ipy_rect(
+                    canvas,
+                    x,
+                    bottom_gap,
+                    self.pipe_width,
+                    self.height - bottom_gap,
+                    fill="#3a9d44",
+                    outline="#237a31",
+                )
+
+            self._ipy_circle(
+                canvas,
+                self.bird_x,
+                self._bird_y,
+                self.bird_radius,
+                fill="#ffd447" if self._alive else "#c8c8c8",
+                outline="#3f2d1c",
+                width=2,
+            )
+
+            self._ipy_text(
+                canvas,
+                f"Score {self._score}",
+                16,
+                16,
+                fill="#17324d",
+                font="bold 16px Helvetica",
+                align="left",
+                baseline="top",
+            )
+            if not self._alive:
+                self._ipy_text(
+                    canvas,
+                    "Game over - press R",
+                    self.width / 2,
+                    self.height / 2,
+                    fill="#17324d",
+                    font="bold 24px Helvetica",
+                    align="center",
+                    baseline="middle",
+                )
+        finally:
+            if should_restore:
+                restore()
+
+        if callable(flush):
+            flush()
+
+    @staticmethod
+    def _is_tk_canvas(canvas: object) -> bool:
+        return all(
+            callable(getattr(canvas, name, None))
+            for name in ("delete", "create_rectangle", "create_oval", "create_text")
+        )
+
+    @staticmethod
+    def _is_ipycanvas(canvas: object) -> bool:
+        return all(
+            callable(getattr(canvas, name, None))
+            for name in (
+                "clear",
+                "fill_rect",
+                "stroke_rect",
+                "fill_circle",
+                "stroke_circle",
+                "fill_text",
+            )
+        )
+
+    def _configure_ipycanvas(self, canvas: object) -> None:
+        if hasattr(canvas, "width"):
+            canvas.width = self.width
+        if hasattr(canvas, "height"):
+            canvas.height = self.height
+
+    @staticmethod
+    def _ipy_fill_rect(
+        canvas: object, x: float, y: float, width: float, height: float, fill: str
+    ) -> None:
+        canvas.fill_style = fill
+        canvas.fill_rect(x, y, width, height)
+
+    @classmethod
+    def _ipy_rect(
+        cls,
+        canvas: object,
+        x: float,
+        y: float,
+        width: float,
+        height: float,
+        *,
+        fill: str,
+        outline: str,
+    ) -> None:
+        cls._ipy_fill_rect(canvas, x, y, width, height, fill)
+        canvas.stroke_style = outline
+        canvas.stroke_rect(x, y, width, height)
+
+    @staticmethod
+    def _ipy_circle(
+        canvas: object,
+        x: float,
+        y: float,
+        radius: float,
+        *,
+        fill: str,
+        outline: str,
+        width: float,
+    ) -> None:
+        canvas.fill_style = fill
+        canvas.fill_circle(x, y, radius)
+        canvas.stroke_style = outline
+        canvas.line_width = width
+        canvas.stroke_circle(x, y, radius)
+
+    @staticmethod
+    def _ipy_text(
+        canvas: object,
+        text: str,
+        x: float,
+        y: float,
+        *,
+        fill: str,
+        font: str,
+        align: str,
+        baseline: str,
+    ) -> None:
+        canvas.fill_style = fill
+        canvas.font = font
+        canvas.text_align = align
+        canvas.text_baseline = baseline
+        canvas.fill_text(text, x, y)
 
     def _validate_config(self) -> None:
         if self.width <= 0 or self.height <= 0:

@@ -150,6 +150,46 @@ class FakeCanvas:
         self.calls.append(("create_text", args, kwargs))
 
 
+class FakeIpyCanvas:
+    def __init__(self) -> None:
+        self.width = 0
+        self.height = 0
+        self.fill_style = ""
+        self.stroke_style = ""
+        self.line_width = 1
+        self.font = ""
+        self.text_align = ""
+        self.text_baseline = ""
+        self.calls: list[tuple[str, tuple[object, ...], dict[str, object]]] = []
+
+    def save(self) -> None:
+        self.calls.append(("save", (), {}))
+
+    def restore(self) -> None:
+        self.calls.append(("restore", (), {}))
+
+    def clear(self) -> None:
+        self.calls.append(("clear", (), {}))
+
+    def fill_rect(self, *args: object, **kwargs: object) -> None:
+        self.calls.append(("fill_rect", args, kwargs))
+
+    def stroke_rect(self, *args: object, **kwargs: object) -> None:
+        self.calls.append(("stroke_rect", args, kwargs))
+
+    def fill_circle(self, *args: object, **kwargs: object) -> None:
+        self.calls.append(("fill_circle", args, kwargs))
+
+    def stroke_circle(self, *args: object, **kwargs: object) -> None:
+        self.calls.append(("stroke_circle", args, kwargs))
+
+    def fill_text(self, *args: object, **kwargs: object) -> None:
+        self.calls.append(("fill_text", args, kwargs))
+
+    def flush(self) -> None:
+        self.calls.append(("flush", (), {}))
+
+
 def test_render_draws_to_canvas_compatible_object() -> None:
     game = FlappyGame(seed=123)
     canvas = FakeCanvas()
@@ -161,3 +201,28 @@ def test_render_draws_to_canvas_compatible_object() -> None:
     assert "create_rectangle" in method_names
     assert "create_oval" in method_names
     assert "create_text" in method_names
+
+
+def test_render_draws_to_ipycanvas_compatible_object() -> None:
+    game = FlappyGame(seed=123)
+    canvas = FakeIpyCanvas()
+
+    game.render(canvas)
+
+    method_names = [name for name, _args, _kwargs in canvas.calls]
+    assert canvas.width == game.width
+    assert canvas.height == game.height
+    assert "clear" in method_names
+    assert "fill_rect" in method_names
+    assert "stroke_rect" in method_names
+    assert "fill_circle" in method_names
+    assert "stroke_circle" in method_names
+    assert "fill_text" in method_names
+    assert method_names[-1] == "flush"
+
+
+def test_render_rejects_unsupported_canvas() -> None:
+    game = FlappyGame(seed=123)
+
+    with pytest.raises(TypeError, match="tkinter.Canvas or ipycanvas.Canvas"):
+        game.render(object())
