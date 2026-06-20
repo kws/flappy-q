@@ -1,0 +1,57 @@
+# flappy-q
+
+A tiny deterministic Flappy Bird-style environment for reinforcement-learning tutorials.
+
+The core game advances one tick at a time. Each tick accepts one action, `flap` or
+`no flap`, and returns the observable game state:
+
+- `dy`: bird vertical offset from the next pipe opening center
+- `vy`: bird vertical velocity
+- `dx`: horizontal distance from the bird to the next pipe
+
+## Install and run
+
+```bash
+uv sync
+uv run flappy-q --seed 123
+```
+
+Controls in the standalone app:
+
+- Space, Up, or W: flap
+- R: reset
+
+The module entry point is also available:
+
+```bash
+uv run python -m flappy_q --seed 123
+```
+
+## Core API
+
+```python
+from flappy_q import FlappyGame
+
+game = FlappyGame(seed=123)
+
+state = game.reset()
+state = game.tick(flap=True)
+state = game.tick(flap=False)
+
+print(state.dy, state.vy, state.dx)
+print(game.alive, game.frames, game.obstacles_passed)
+```
+
+Rendering targets a `tkinter.Canvas`-compatible object:
+
+```python
+game.render(canvas)
+```
+
+The game is deterministic for a given seed and input sequence.
+
+## Tests
+
+```bash
+uv run pytest
+```

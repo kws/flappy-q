@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "flappy-q"
+version = "0.1.0"
+description = "A tiny deterministic Flappy Bird-style environment for reinforcement-learning tutorials."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  { name = "flappy-q contributors" },
+]
+dependencies = []
+
+[project.scripts]
+flappy-q = "flappy_q.app:main"
+
+[dependency-groups]
+dev = [
+  "pytest>=8.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/flappy_q"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
