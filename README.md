@@ -8,6 +8,7 @@ The core game advances one tick at a time. Each tick accepts one action, `flap` 
 - `dy`: bird vertical offset from the next pipe opening center
 - `vy`: bird vertical velocity
 - `dx`: horizontal distance from the bird to the active pipe's trailing edge
+- `bird_y`: absolute bird vertical position for edge detection
 
 ## Install and run
 
@@ -38,7 +39,7 @@ state = game.reset()
 state = game.tick(flap=True)
 state = game.tick(flap=False)
 
-print(state.dy, state.vy, state.dx)
+print(state.dy, state.vy, state.dx, state.bird_y)
 print(game.alive, game.frames, game.obstacles_passed)
 ```
 

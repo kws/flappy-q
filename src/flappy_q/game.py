@@ -13,6 +13,7 @@ class GameState:
     dy: float
     vy: float
     dx: float
+    bird_y: float
 
 
 @dataclass(slots=True)
@@ -359,6 +360,7 @@ class FlappyGame:
             dy=self._bird_y - pipe.gap_y,
             vy=self._bird_vy,
             dx=pipe.x + self.pipe_width - self.bird_x,
+            bird_y=self._bird_y,
         )
 
     def _next_pipe(self) -> _Pipe:

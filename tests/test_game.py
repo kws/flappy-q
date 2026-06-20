@@ -54,6 +54,16 @@ def test_no_flap_applies_gravity_and_scrolls_pipe() -> None:
     assert state.dx == pytest.approx(initial.dx - game.scroll_speed)
 
 
+def test_state_includes_actual_bird_y() -> None:
+    game = FlappyGame(seed=123)
+
+    initial = game.state
+    state = game.tick(False)
+
+    assert initial.bird_y == pytest.approx(game.height / 2)
+    assert state.bird_y == pytest.approx(initial.bird_y + game.gravity)
+
+
 def test_dx_tracks_trailing_edge_until_pipe_is_cleared() -> None:
     game = FlappyGame(
         seed=10,
