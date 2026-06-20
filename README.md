@@ -43,17 +43,20 @@ print(game.alive, game.frames, game.obstacles_passed)
 ```
 
 Rendering supports either a `tkinter.Canvas`-compatible object or an
-`ipycanvas.Canvas` in notebooks:
+`ipycanvas.Canvas` in notebooks. `FlappyGame.render()` draws only the game
+world, so reinforcement-learning loops can choose their own metrics overlay:
 
 ```python
 game.render(canvas)
 ```
 
-Notebook example:
+Jupyter example:
 
 ```python
+!pip install ipycanvas
+
 from IPython.display import display
-from ipycanvas import Canvas
+from ipycanvas import Canvas, hold_canvas
 
 from flappy_q import FlappyGame
 
@@ -61,7 +64,48 @@ game = FlappyGame(seed=123)
 canvas = Canvas(width=game.width, height=game.height)
 display(canvas)
 
-game.render(canvas)
+episode = 0
+q_table = {}
+
+with hold_canvas(canvas):
+    canvas.clear()
+    game.render(canvas)
+    canvas.fill_style = "#17324d"
+    canvas.font = "16px sans-serif"
+    canvas.fill_text(f"Episode: {episode}", 10, 20)
+    canvas.fill_text(f"Score: {game.obstacles_passed}", 10, 40)
+    canvas.fill_text(f"Q-Table Size: {len(q_table)}", 10, 60)
+```
+
+Colab example:
+
+```python
+!pip install ipycanvas
+!pip install git+https://github.com/kws/flappy-q.git
+
+from google.colab import output
+output.enable_custom_widget_manager()
+
+from IPython.display import display
+from ipycanvas import Canvas, hold_canvas
+
+from flappy_q import FlappyGame
+
+game = FlappyGame(seed=123)
+canvas = Canvas(width=game.width, height=game.height)
+display(canvas)
+
+episode = 0
+q_table = {}
+
+with hold_canvas(canvas):
+    canvas.clear()
+    game.render(canvas)
+    canvas.fill_style = "#17324d"
+    canvas.font = "16px sans-serif"
+    canvas.fill_text(f"Episode: {episode}", 10, 20)
+    canvas.fill_text(f"Score: {game.obstacles_passed}", 10, 40)
+    canvas.fill_text(f"Q-Table Size: {len(q_table)}", 10, 60)
 ```
 
 The game is deterministic for a given seed and input sequence.

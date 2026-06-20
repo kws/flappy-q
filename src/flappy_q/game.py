@@ -202,23 +202,6 @@ class FlappyGame:
             width=2,
         )
 
-        canvas.create_text(
-            16,
-            16,
-            text=f"Score {self._score}",
-            anchor="nw",
-            fill="#17324d",
-            font=("Helvetica", 16, "bold"),
-        )
-        if not self._alive:
-            canvas.create_text(
-                self.width / 2,
-                self.height / 2,
-                text="Game over - press R",
-                fill="#17324d",
-                font=("Helvetica", 24, "bold"),
-            )
-
     def _render_ipycanvas(self, canvas: object) -> None:
         self._configure_ipycanvas(canvas)
         save = getattr(canvas, "save", None)
@@ -273,28 +256,6 @@ class FlappyGame:
                 outline="#3f2d1c",
                 width=2,
             )
-
-            self._ipy_text(
-                canvas,
-                f"Score {self._score}",
-                16,
-                16,
-                fill="#17324d",
-                font="bold 16px Helvetica",
-                align="left",
-                baseline="top",
-            )
-            if not self._alive:
-                self._ipy_text(
-                    canvas,
-                    "Game over - press R",
-                    self.width / 2,
-                    self.height / 2,
-                    fill="#17324d",
-                    font="bold 24px Helvetica",
-                    align="center",
-                    baseline="middle",
-                )
         finally:
             if should_restore:
                 restore()
@@ -306,7 +267,7 @@ class FlappyGame:
     def _is_tk_canvas(canvas: object) -> bool:
         return all(
             callable(getattr(canvas, name, None))
-            for name in ("delete", "create_rectangle", "create_oval", "create_text")
+            for name in ("delete", "create_rectangle", "create_oval")
         )
 
     @staticmethod
@@ -319,7 +280,6 @@ class FlappyGame:
                 "stroke_rect",
                 "fill_circle",
                 "stroke_circle",
-                "fill_text",
             )
         )
 
@@ -368,24 +328,6 @@ class FlappyGame:
         canvas.stroke_style = outline
         canvas.line_width = width
         canvas.stroke_circle(x, y, radius)
-
-    @staticmethod
-    def _ipy_text(
-        canvas: object,
-        text: str,
-        x: float,
-        y: float,
-        *,
-        fill: str,
-        font: str,
-        align: str,
-        baseline: str,
-    ) -> None:
-        canvas.fill_style = fill
-        canvas.font = font
-        canvas.text_align = align
-        canvas.text_baseline = baseline
-        canvas.fill_text(text, x, y)
 
     def _validate_config(self) -> None:
         if self.width <= 0 or self.height <= 0:

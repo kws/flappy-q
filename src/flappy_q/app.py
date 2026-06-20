@@ -38,7 +38,7 @@ class FlappyApp:
         self.root.bind("<Escape>", lambda _event: self.root.destroy())
 
     def run(self) -> None:
-        self.game.render(self.canvas)
+        self._render()
         self.root.after(self._frame_delay_ms, self._tick)
         self.root.mainloop()
 
@@ -52,14 +52,33 @@ class FlappyApp:
     def _reset(self, _event: tk.Event[tk.Misc] | None = None) -> None:
         self.game.reset()
         self._flap_requested = False
-        self.game.render(self.canvas)
+        self._render()
 
     def _tick(self) -> None:
         if self.game.alive:
             self.game.tick(self._flap_requested)
         self._flap_requested = False
-        self.game.render(self.canvas)
+        self._render()
         self.root.after(self._frame_delay_ms, self._tick)
+
+    def _render(self) -> None:
+        self.game.render(self.canvas)
+        self.canvas.create_text(
+            16,
+            16,
+            text=f"Score {self.game.score}",
+            anchor="nw",
+            fill="#17324d",
+            font=("Helvetica", 16, "bold"),
+        )
+        if not self.game.alive:
+            self.canvas.create_text(
+                self.game.width / 2,
+                self.game.height / 2,
+                text="Game over - press R",
+                fill="#17324d",
+                font=("Helvetica", 24, "bold"),
+            )
 
 
 def build_parser() -> argparse.ArgumentParser:

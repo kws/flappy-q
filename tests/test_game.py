@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 from flappy_q import FlappyGame, GameState
+from flappy_q.app import FlappyApp
 
 
 def test_same_seed_and_inputs_produce_same_states() -> None:
@@ -219,7 +220,6 @@ def test_render_draws_to_canvas_compatible_object() -> None:
     assert "delete" in method_names
     assert "create_rectangle" in method_names
     assert "create_oval" in method_names
-    assert "create_text" in method_names
 
 
 def test_render_draws_to_ipycanvas_compatible_object() -> None:
@@ -236,8 +236,26 @@ def test_render_draws_to_ipycanvas_compatible_object() -> None:
     assert "stroke_rect" in method_names
     assert "fill_circle" in method_names
     assert "stroke_circle" in method_names
-    assert "fill_text" in method_names
     assert method_names[-1] == "flush"
+
+
+def test_app_render_draws_manual_play_overlay() -> None:
+    app = FlappyApp.__new__(FlappyApp)
+    app.game = FlappyGame(seed=123)
+    app.canvas = FakeCanvas()
+
+    while app.game.alive:
+        app.game.tick(False)
+
+    app._render()
+
+    text_calls = [
+        kwargs["text"]
+        for name, _args, kwargs in app.canvas.calls
+        if name == "create_text"
+    ]
+    assert f"Score {app.game.score}" in text_calls
+    assert "Game over - press R" in text_calls
 
 
 def test_render_rejects_unsupported_canvas() -> None:
