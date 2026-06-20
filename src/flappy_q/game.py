@@ -26,7 +26,9 @@ class FlappyGame:
     """A deterministic tick-driven Flappy Bird-style game.
 
     Coordinates use a top-left origin. Positive `dy` means the bird is below the
-    center of the next pipe opening; negative `dy` means it is above.
+    center of the active pipe opening; negative `dy` means it is above. `dx`
+    measures the horizontal distance from the bird to the active pipe's trailing
+    edge.
     """
 
     def __init__(
@@ -414,7 +416,7 @@ class FlappyGame:
         return GameState(
             dy=self._bird_y - pipe.gap_y,
             vy=self._bird_vy,
-            dx=pipe.x - self.bird_x,
+            dx=pipe.x + self.pipe_width - self.bird_x,
         )
 
     def _next_pipe(self) -> _Pipe:

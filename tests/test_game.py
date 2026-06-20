@@ -53,6 +53,25 @@ def test_no_flap_applies_gravity_and_scrolls_pipe() -> None:
     assert state.dx == pytest.approx(initial.dx - game.scroll_speed)
 
 
+def test_dx_tracks_trailing_edge_until_pipe_is_cleared() -> None:
+    game = FlappyGame(
+        seed=10,
+        width=320,
+        bird_x=80,
+        gravity=0,
+        scroll_speed=80,
+        pipe_gap=300,
+    )
+
+    for _ in range(3):
+        state = game.tick(False)
+
+    assert game.alive
+    assert game.score == 1
+    assert state.dx == pytest.approx(-8)
+    assert state.dx > -game.bird_radius
+
+
 def test_reset_without_seed_replays_same_map() -> None:
     game = FlappyGame(seed=42)
     initial = game.state
